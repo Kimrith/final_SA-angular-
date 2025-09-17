@@ -5,6 +5,7 @@ import { About } from '../Components/Home/about/about';
 import { Contact } from '../Components/Home/contact/contact';
 import { Service } from '../Components/Home/service/service';
 import { Login } from '../Components/Home/login/login';
+import { Menu } from '../Components/Home/menu/menu';
 
 export const routes: Routes = [
   {
@@ -31,6 +32,10 @@ export const routes: Routes = [
       {
         path: 'contact',
         component: Contact,
+      },
+      {
+        path: 'menu',
+        component: Menu,
       },
     ],
   },
