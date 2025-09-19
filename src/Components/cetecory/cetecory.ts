@@ -1,9 +1,9 @@
-import { NgFor } from '@angular/common';
+import { NgClass, NgFor } from '@angular/common';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-cetecory',
-  imports: [NgFor],
+  imports: [NgFor, NgClass],
   templateUrl: './cetecory.html',
   styleUrl: './cetecory.css',
 })
