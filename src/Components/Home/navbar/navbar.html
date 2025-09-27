@@ -1,7 +1,7 @@
 <!-- Overlay for mobile -->
 <div
   *ngIf="menuOpen"
-  class="fixed inset-0 bg-black bg-opacity-40 z-40 md:hidden"
+  class="fixed inset-0 bg-black bg-black/72 z-40 md:hidden"
   (click)="closeMenu()"
 ></div>
 
@@ -48,7 +48,7 @@
 
   <!-- Slide-in Mobile Menu -->
   <div
-    class="fixed top-0 left-0 h-full w-64 bg-white z-50 p-6 transition-transform transform md:hidden"
+    class="fixed top-0 left-0 h-full w-64 bg-gray-100 z-50 p-6 transition-transform transform md:hidden"
     [ngClass]="menuOpen ? 'translate-x-0' : '-translate-x-full'"
   >
     <button (click)="closeMenu()" class="text-gray-700 mb-6 float-right text-xl">✕</button>

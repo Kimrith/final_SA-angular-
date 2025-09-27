@@ -29,9 +29,11 @@
         alt="{{ product.name }}"
         class="w-full h-40 object-cover bg-gray-200"
       />
-      <h3 class="py-3 text-blue-500 font-bold text-xl fade-up">
-        {{ product.name }}
-      </h3>
+      <a [routerLink]="'/' + product.path">
+        <div class="py-3 text-blue-500 font-bold text-xl fade-up">
+          {{ product.name }}
+        </div>
+      </a>
     </div>
   </div>
 </div>

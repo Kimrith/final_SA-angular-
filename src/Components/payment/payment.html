@@ -1,1 +1,39 @@
-<p>payment works!</p>
+<div class="bg-white p-6 rounded-xl shadow-lg max-w-3xl mx-auto">
+  <div class="mt-16">
+    <app-typeoffood></app-typeoffood>
+  </div>
+
+  <div class="mt-16">
+    <app-typesolfdrink></app-typesolfdrink>
+  </div>
+  <div class="mt-16">
+    <app-typefruit></app-typefruit>
+  </div>
+  <div class="mt-16">
+    <app-typeother></app-typeother>
+  </div>
+
+  <div class="mt-10 text-center bg-gray-100 p-4 rounded-lg shadow-md">
+    <h2 class="text-lg font-bold text-gray-700">🛒 Final Summary</h2>
+    <p class="text-gray-600">Total Quantity: {{ getTotalQty() }}</p>
+    <p class="text-gray-800 font-semibold">Total Price: {{ getGrandTotal() | currency : 'USD' }}</p>
+  </div>
+
+  <div class="text-center flex justify-center gap-6 mt-6">
+    <!-- ✅ Payment Button -->
+    <button
+      (click)="payNow()"
+      class="px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+    >
+      💳 Payment
+    </button>
+
+    <!-- ❌ Cancel Button -->
+    <button
+      (click)="cancelOrder()"
+      class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+    >
+      ❌ Cancel
+    </button>
+  </div>
+</div>

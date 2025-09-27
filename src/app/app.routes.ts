@@ -6,6 +6,11 @@ import { Contact } from '../Components/Home/contact/contact';
 import { Service } from '../Components/Home/service/service';
 import { Login } from '../Components/Home/login/login';
 import { Menu } from '../Components/Home/menu/menu';
+import { Food } from '../Components/food/food';
+import { SolfDrink } from '../Components/solf-drink/solf-drink';
+import { Fruit } from '../Components/fruit/fruit';
+import { Other } from '../Components/other/other';
+import { Payment } from '../Components/payment/payment';
 
 export const routes: Routes = [
   {
@@ -36,6 +41,26 @@ export const routes: Routes = [
       {
         path: 'menu',
         component: Menu,
+      },
+      {
+        path: 'food',
+        component: Food,
+      },
+      {
+        path: 'solf_drink',
+        component: SolfDrink,
+      },
+      {
+        path: 'fruit',
+        component: Fruit,
+      },
+      {
+        path: 'other',
+        component: Other,
+      },
+      {
+        path: 'payment',
+        component: Payment,
       },
     ],
   },

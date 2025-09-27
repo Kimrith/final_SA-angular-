@@ -22,6 +22,7 @@ export class Navbar implements OnInit {
     { path: 'about', label: 'About' },
     { path: 'service', label: 'Services' },
     { path: 'contact', label: 'Contact' },
+    { path: 'payment', label: 'Payment' },
   ];
 
   ngOnInit() {
