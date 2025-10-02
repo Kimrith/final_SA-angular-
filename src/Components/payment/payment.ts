@@ -4,6 +4,7 @@ import { Typesolfdrink } from '../typesolfdrink/typesolfdrink';
 import { Typefruit } from '../typefruit/typefruit';
 import { Typeoffood } from '../typeoffood/typeoffood';
 import { Typeother } from '../typeother/typeother';
+import { OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-payment',
@@ -12,8 +13,15 @@ import { Typeother } from '../typeother/typeother';
   templateUrl: './payment.html',
   styleUrls: ['./payment.css'],
 })
-export class Payment {
+export class Payment implements OnInit {
+  loggedIn = false;
+
   // ✅ Combine Food + SoftDrink + Fruit + Other quantities
+
+  ngOnInit() {
+    this.loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  }
+
   getTotalQty(): number {
     const foodCart = JSON.parse(localStorage.getItem('cartFood') || '[]');
     const foodQty = foodCart.reduce((sum: number, item: any) => sum + item.qty, 0);
@@ -57,7 +65,10 @@ export class Payment {
 
   cancelOrder() {
     if (confirm('Are you sure you want to cancel the order?')) {
-      localStorage.clear();
+      localStorage.removeItem('cartFood');
+      localStorage.removeItem('cartSolftdrink');
+      localStorage.removeItem('cartFruit');
+      localStorage.removeItem('cartOther');
       alert('❌ Order canceled!');
       location.reload();
     }
