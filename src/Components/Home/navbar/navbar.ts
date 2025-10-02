@@ -14,6 +14,7 @@ import { Carousel } from '../carousel/carousel';
 export class Navbar implements OnInit {
   menuOpen = false;
   loggedIn = false;
+  user_name: string = '';
 
   constructor(private router: Router) {}
 
@@ -32,6 +33,14 @@ export class Navbar implements OnInit {
     window.addEventListener('storage', () => {
       this.checkLoginStatus();
     });
+
+    const storedUser = localStorage.getItem('user');
+    this.user_name = storedUser ? storedUser : 'User None';
+
+    const savedImage = localStorage.getItem('imgUpload');
+    if (savedImage) {
+      this.imgUpload = savedImage; // Load the image URL from localStorage
+    }
   }
 
   checkLoginStatus() {
@@ -51,13 +60,47 @@ export class Navbar implements OnInit {
       // Logout
       localStorage.removeItem('isLoggedIn');
       this.loggedIn = false;
+      localStorage.removeItem('user');
       window.dispatchEvent(new Event('storage'));
       this.router.navigate(['/login']);
     } else {
       // Go to login
       this.router.navigate(['/login']);
     }
-
+    localStorage.removeItem('imgUpload');
     this.closeMenu();
   }
+
+  showTopup = false;
+  imgUpload: string | null = null; // To store the image URL locally
+
+  toggleTopup() {
+    this.showTopup = !this.showTopup;
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      console.log('Selected file:', file.name);
+      // Generate a temporary URL for the image locally
+      this.imgUpload = URL.createObjectURL(file);
+    }
+  }
+
+  upload() {
+    // Save the locally selected image URL to localStorage
+    if (this.imgUpload) {
+      localStorage.setItem('imgUpload', this.imgUpload);
+      console.log('Image saved to localStorage');
+    } else {
+      console.log('No image selected yet.');
+    }
+    this.showTopup = !this.showTopup;
+  }
+
+  Remove() {
+    localStorage.removeItem('imgUpload');
+    window.location.reload();
+  }
+  // To load the image from localStorage when the component initializes (e.g., on page reload)
 }
