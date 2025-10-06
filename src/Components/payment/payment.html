@@ -1,20 +1,9 @@
 <!-- Order Summary Section -->
 <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg max-w-3xl mx-auto mt-10">
-  <div class="mt-10 sm:mt-16">
-    <app-typeoffood></app-typeoffood>
-  </div>
-
-  <div class="mt-10 sm:mt-16">
-    <app-typesolfdrink></app-typesolfdrink>
-  </div>
-
-  <div class="mt-10 sm:mt-16">
-    <app-typefruit></app-typefruit>
-  </div>
-
-  <div class="mt-10 sm:mt-16">
-    <app-typeother></app-typeother>
-  </div>
+  <div class="mt-10 sm:mt-16"><app-typeoffood></app-typeoffood></div>
+  <div class="mt-10 sm:mt-16"><app-typesolfdrink></app-typesolfdrink></div>
+  <div class="mt-10 sm:mt-16"><app-typefruit></app-typefruit></div>
+  <div class="mt-10 sm:mt-16"><app-typeother></app-typeother></div>
 
   <!-- Final Summary -->
   <div class="mt-10 text-center bg-gray-100 p-4 rounded-lg shadow-md">
@@ -47,8 +36,7 @@
   </div>
 </div>
 
-<!-- Overlay Modal for Step 1 & 2 -->
-
+<!-- Modal for Step 1 & 2 -->
 <div
   *ngIf="step > 0"
   class="fixed inset-0 flex items-center justify-center z-50 p-4"
@@ -58,16 +46,14 @@
     class="bg-white w-full max-w-md p-6 rounded-xl shadow-lg text-center relative"
     (click)="$event.stopPropagation()"
   >
-    <!-- Close Button -->
     <button
       (click)="step = 0"
       class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
-      aria-label="Close modal"
     >
       &times;
     </button>
 
-    <!-- Step 1: Delivery or Pickup -->
+    <!-- Step 1 -->
     <div *ngIf="step === 1">
       <h2 class="text-xl sm:text-2xl font-bold mb-6">How do you want to receive your order?</h2>
       <div class="flex flex-col sm:flex-row justify-center gap-4">
@@ -86,13 +72,12 @@
       </div>
     </div>
 
-    <!-- Step 2: Payment Options -->
+    <!-- Step 2 -->
     <div *ngIf="step === 2">
       <h2 class="text-lg sm:text-xl font-semibold mb-4">
         Payment Method for <span class="capitalize">{{ choice }}</span>
       </h2>
 
-      <!-- Delivery: Cash or QR -->
       <div *ngIf="choice === 'delivery'" class="flex flex-col sm:flex-row justify-center gap-4">
         <button
           (click)="pay('Cash')"
@@ -100,8 +85,6 @@
         >
           💵 Cash
         </button>
-        <!-- Preview QR Code -->
-
         <button
           (click)="pay('QR Pay')"
           class="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl shadow transition"
@@ -110,7 +93,6 @@
         </button>
       </div>
 
-      <!-- Pickup: Cash, QR, Card -->
       <div *ngIf="choice === 'pickup'" class="flex flex-col sm:flex-row justify-center gap-4">
         <button
           (click)="pay('Cash')"
@@ -126,7 +108,6 @@
         </button>
       </div>
 
-      <!-- Back Button -->
       <div class="mt-6">
         <button
           (click)="back()"
@@ -139,17 +120,14 @@
   </div>
 </div>
 
-<!-- Receipt (QR Code Section) -->
-<!-- Full-screen overlay -->
-
+<!-- QR Receipt Section -->
+<!-- QR Receipt Section -->
 <div
   *ngIf="showQRCode"
   id="print-section"
   class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
 >
-  <!-- Modal card -->
   <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 text-center">
-    <!-- Close button -->
     <button
       class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold"
       (click)="showQRCode = false"
@@ -157,16 +135,13 @@
       ✕
     </button>
 
-    <!-- Header -->
     <h2 class="text-2xl font-bold text-gray-800 mb-4">📱 Scan to Pay</h2>
 
-    <!-- Totals -->
     <div class="flex justify-around mb-4 text-green-600 font-semibold">
       <p>Total Amount: {{ getGrandTotal() | currency : 'USD' }}</p>
       <p>Total Qty: {{ getTotalQty() }}</p>
     </div>
 
-    <!-- QR Code -->
     <img
       [src]="qrImage"
       alt="QR Code"
@@ -175,7 +150,6 @@
 
     <p class="text-gray-700 mb-6">Thank you for your purchase!</p>
 
-    <!-- Print Button -->
     <button
       (click)="printQR()"
       class="w-full mb-6 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl shadow transition duration-300 ease-in-out"
@@ -183,9 +157,9 @@
       🖨 Print Receipt
     </button>
 
-    <!-- Product Table -->
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+    <!-- Scrollable Table -->
+    <div class="overflow-x-auto max-h-60 md:max-h-96 overflow-y-auto">
+      <table class="w-full min-w-[400px] text-sm border border-gray-200 rounded-lg overflow-hidden">
         <thead class="bg-gray-100">
           <tr>
             <th class="px-4 py-2 border-b border-gray-200 text-left">Id</th>
@@ -194,29 +168,17 @@
             <th class="px-4 py-2 border-b border-gray-200 text-right">Price</th>
           </tr>
         </thead>
-
-        <tbody>
-          @for (product of total_Products; track product.id) {
-          <tr
-            class="even:bg-gray-50"
-            *ngFor="let product of total_Products; let i = index"
-            class="even:bg-gray-50"
-          >
-            <!-- <td class="px-4 py-2 border-b border-gray-200">{{ product.id }}</td> -->
-            <td class="px-4 py-2 border-b border-gray-200">{{ i + 1 }}</td>
+        <tbody class="max-h-64 overflow-y-auto">
+          <tr *ngFor="let product of total_Products; trackBy: trackById" class="even:bg-gray-50">
+            <td class="px-4 py-2 border-b border-gray-200">{{ product.id }}</td>
             <td class="px-4 py-2 border-b border-gray-200">{{ product.name }}</td>
             <td class="px-4 py-2 border-b border-gray-200 text-center">{{ product.qty }}</td>
             <td class="px-4 py-2 border-b border-gray-200 text-right">
               {{ product.price | currency : 'USD' }}
             </td>
           </tr>
-          }
         </tbody>
       </table>
     </div>
   </div>
 </div>
-
-<!-- Use the public asset path (copied to build output root). Do not reference the source folder with relative paths. -->
-<!-- <img src="/aba.png" alt="ABA QR code" />
-<h2>sdg</h2> -->

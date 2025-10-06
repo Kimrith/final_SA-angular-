@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CurrencyPipe, NgFor, NgIf } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { Typesolfdrink } from '../typesolfdrink/typesolfdrink';
 import { Typefruit } from '../typefruit/typefruit';
 import { Typeoffood } from '../typeoffood/typeoffood';
@@ -35,28 +35,12 @@ export class Payment implements OnInit {
 
   // ✅ Total Quantity
   getTotalQty(): number {
-    const foodCart = JSON.parse(localStorage.getItem('cartFood') || '[]');
-    const solftDrinkCart = JSON.parse(localStorage.getItem('cartSolftdrink') || '[]');
-    const fruitCart = JSON.parse(localStorage.getItem('cartFruit') || '[]');
-    const otherCart = JSON.parse(localStorage.getItem('cartOther') || '[]');
-
-    return [...foodCart, ...solftDrinkCart, ...fruitCart, ...otherCart].reduce(
-      (sum: number, item: any) => sum + item.qty,
-      0
-    );
+    return this.total_Products.reduce((sum, item) => sum + item.qty, 0);
   }
 
   // ✅ Grand Total Price
   getGrandTotal(): number {
-    const foodCart = JSON.parse(localStorage.getItem('cartFood') || '[]');
-    const solftDrinkCart = JSON.parse(localStorage.getItem('cartSolftdrink') || '[]');
-    const fruitCart = JSON.parse(localStorage.getItem('cartFruit') || '[]');
-    const otherCart = JSON.parse(localStorage.getItem('cartOther') || '[]');
-
-    return [...foodCart, ...solftDrinkCart, ...fruitCart, ...otherCart].reduce(
-      (sum: number, item: any) => sum + item.price * item.qty,
-      0
-    );
+    return this.total_Products.reduce((sum, item) => sum + item.price * item.qty, 0);
   }
 
   // ✅ Handle "Pay Now" button
@@ -91,11 +75,7 @@ export class Payment implements OnInit {
     localStorage.removeItem('cartSolftdrink');
     localStorage.removeItem('cartFruit');
     localStorage.removeItem('cartOther');
-  }
-
-  // ✅ Optional debug log
-  showTopup(): void {
-    console.log('Top-up flow started');
+    this.total_Products = [];
   }
 
   // ✅ Delivery or Pickup Selection
@@ -109,14 +89,12 @@ export class Payment implements OnInit {
     console.log(`Payment selected: ${method}`);
 
     if (method === 'QR Pay') {
-      this.showQRCode = true; // ✅ Show QR section
+      this.showQRCode = true; // Show QR section
       this.step = 0; // Close modal
-    } else if (method === 'Cash') {
-      alert(
-        `✅ Payment successful via Cash. Thank you for your order!\n\nTotal Price: ${this.getGrandTotal()} $\nTotal Quantity: ${this.getTotalQty()}`
-      );
     } else {
-      alert(`✅ Payment successful via ${method}. Thank you for your order!`);
+      alert(
+        `✅ Payment successful via ${method}. Thank you for your order!\n\nTotal Price: ${this.getGrandTotal()} $\nTotal Quantity: ${this.getTotalQty()}`
+      );
       this.clearCart();
       this.step = 0;
       location.reload();
@@ -129,6 +107,12 @@ export class Payment implements OnInit {
     this.choice = '';
   }
 
+  // ✅ TrackBy for ngFor
+  trackById(index: number, item: any): any {
+    return item.id;
+  }
+
+  // ✅ Print QR Receipt
   printQR() {
     const printContents = document.getElementById('print-section')?.innerHTML;
 
@@ -137,9 +121,6 @@ export class Payment implements OnInit {
       return;
     }
 
-    // Optional: alert for testing
-    alert('Printing receipt...');
-
     const printWindow = window.open('', '', 'width=800,height=600');
     if (!printWindow) {
       console.error('Failed to open print window');
@@ -147,24 +128,23 @@ export class Payment implements OnInit {
     }
 
     printWindow.document.write(`
-    <html>
-      <head>
-        <title>Receipt</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-          th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-          th { background-color: #f4f4f4; }
-        </style>
-      </head>
-      <body>
-        ${printContents},
-        <p>Total Price: ${this.getGrandTotal()} $</p>
-        <p>Total Quantity: ${this.getTotalQty()}</p>
-        
-      </body>
-    </html>
-  `);
+      <html>
+        <head>
+          <title>Receipt</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+            th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+            th { background-color: #f4f4f4; }
+          </style>
+        </head>
+        <body>
+          ${printContents}
+          <p>Total Price: ${this.getGrandTotal()} $</p>
+          <p>Total Quantity: ${this.getTotalQty()}</p>
+        </body>
+      </html>
+    `);
 
     printWindow.document.close();
     printWindow.focus();
