@@ -35,7 +35,7 @@ export class Food {
 
   constructor() {
     // ✅ Load cart from localStorage on init
-    const savedCart = localStorage.getItem('cart');
+    const savedCart = localStorage.getItem('cartFood');
     if (savedCart) {
       this.cartFood = JSON.parse(savedCart);
     }

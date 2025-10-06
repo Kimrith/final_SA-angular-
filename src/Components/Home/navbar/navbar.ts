@@ -81,14 +81,29 @@ export class Navbar implements OnInit {
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
-      console.log('Selected file:', file.name);
-      // Generate a temporary URL for the image locally
-      this.imgUpload = URL.createObjectURL(file);
+      // Check size (example: max 1MB = 1,000,000 bytes)
+      if (file.size > 1000000) {
+        console.warn('File too large, using default image instead.');
+        this.imgUpload =
+          'https://www.iprcenter.gov/image-repository/blank-profile-picture.png/@@images/image.png';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imgUpload = reader.result as string;
+        console.log('Image loaded successfully');
+      };
+      reader.onerror = () => {
+        console.error('Error reading file, using default image.');
+        this.imgUpload =
+          'https://www.iprcenter.gov/image-repository/blank-profile-picture.png/@@images/image.png';
+      };
+      reader.readAsDataURL(file);
     }
   }
 
   upload() {
-    // Save the locally selected image URL to localStorage
     if (this.imgUpload) {
       localStorage.setItem('imgUpload', this.imgUpload);
       console.log('Image saved to localStorage');

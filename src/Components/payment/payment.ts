@@ -1,76 +1,178 @@
-import { Component } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { CurrencyPipe, NgFor, NgIf } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
 import { Typesolfdrink } from '../typesolfdrink/typesolfdrink';
 import { Typefruit } from '../typefruit/typefruit';
 import { Typeoffood } from '../typeoffood/typeoffood';
 import { Typeother } from '../typeother/typeother';
-import { OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-payment',
   standalone: true,
-  imports: [CurrencyPipe, Typesolfdrink, Typefruit, Typeoffood, Typeother],
+  imports: [CurrencyPipe, Typesolfdrink, Typefruit, Typeoffood, Typeother, NgIf, NgFor],
   templateUrl: './payment.html',
   styleUrls: ['./payment.css'],
 })
 export class Payment implements OnInit {
   loggedIn = false;
+  step: number = 0; // 0 = summary, 1 = delivery/pickup, 2 = payment method
+  choice: string = ''; // 'delivery' or 'pickup'
+  qrImage: string = '/aba.png'; // QR code image path (served from public folder)
+  showQRCode: boolean = false; // Control QR code visibility
+  total_Products: any[] = [];
 
-  // ✅ Combine Food + SoftDrink + Fruit + Other quantities
+  constructor(private router: Router) {}
 
   ngOnInit() {
     this.loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const food = JSON.parse(localStorage.getItem('cartFood') || '[]');
+    const drinks = JSON.parse(localStorage.getItem('cartSolftdrink') || '[]');
+    const fruits = JSON.parse(localStorage.getItem('cartFruit') || '[]');
+    const others = JSON.parse(localStorage.getItem('cartOther') || '[]');
+
+    this.total_Products = [...food, ...drinks, ...fruits, ...others];
   }
 
+  // ✅ Total Quantity
   getTotalQty(): number {
     const foodCart = JSON.parse(localStorage.getItem('cartFood') || '[]');
-    const foodQty = foodCart.reduce((sum: number, item: any) => sum + item.qty, 0);
-
     const solftDrinkCart = JSON.parse(localStorage.getItem('cartSolftdrink') || '[]');
-    const drinkQty = solftDrinkCart.reduce((sum: number, item: any) => sum + item.qty, 0);
-
     const fruitCart = JSON.parse(localStorage.getItem('cartFruit') || '[]');
-    const fruitQty = fruitCart.reduce((sum: number, item: any) => sum + item.qty, 0);
-
     const otherCart = JSON.parse(localStorage.getItem('cartOther') || '[]');
-    const otherQty = otherCart.reduce((sum: number, item: any) => sum + item.qty, 0);
 
-    return foodQty + drinkQty + fruitQty + otherQty;
+    return [...foodCart, ...solftDrinkCart, ...fruitCart, ...otherCart].reduce(
+      (sum: number, item: any) => sum + item.qty,
+      0
+    );
   }
 
-  // ✅ Combine Food + SoftDrink + Fruit + Other totals
+  // ✅ Grand Total Price
   getGrandTotal(): number {
     const foodCart = JSON.parse(localStorage.getItem('cartFood') || '[]');
-    const foodTotal = foodCart.reduce((sum: number, item: any) => sum + item.price * item.qty, 0);
-
     const solftDrinkCart = JSON.parse(localStorage.getItem('cartSolftdrink') || '[]');
-    const drinkTotal = solftDrinkCart.reduce(
+    const fruitCart = JSON.parse(localStorage.getItem('cartFruit') || '[]');
+    const otherCart = JSON.parse(localStorage.getItem('cartOther') || '[]');
+
+    return [...foodCart, ...solftDrinkCart, ...fruitCart, ...otherCart].reduce(
       (sum: number, item: any) => sum + item.price * item.qty,
       0
     );
-
-    const fruitCart = JSON.parse(localStorage.getItem('cartFruit') || '[]');
-    const fruitTotal = fruitCart.reduce((sum: number, item: any) => sum + item.price * item.qty, 0);
-
-    const otherCart = JSON.parse(localStorage.getItem('cartOther') || '[]');
-    const otherTotal = otherCart.reduce((sum: number, item: any) => sum + item.price * item.qty, 0);
-
-    return foodTotal + drinkTotal + fruitTotal + otherTotal;
   }
 
+  // ✅ Handle "Pay Now" button
   payNow() {
-    alert('💳 Payment started!');
-    // You can add redirect / API call here later
+    if (this.getGrandTotal() === 0) {
+      alert('🛑 Your cart is empty. Please add some items.');
+      this.router.navigate(['/home']);
+      return;
+    }
+
+    if (!this.loggedIn) {
+      alert('⚠️ You must be logged in to proceed with payment.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.step = 1; // Proceed to delivery/pickup step
   }
 
+  // ✅ Cancel Order Flow
   cancelOrder() {
-    if (confirm('Are you sure you want to cancel the order?')) {
-      localStorage.removeItem('cartFood');
-      localStorage.removeItem('cartSolftdrink');
-      localStorage.removeItem('cartFruit');
-      localStorage.removeItem('cartOther');
+    if (confirm('Are you sure you want to cancel your order?')) {
+      this.clearCart();
       alert('❌ Order canceled!');
       location.reload();
     }
+  }
+
+  // ✅ Clear Cart Data
+  clearCart(): void {
+    localStorage.removeItem('cartFood');
+    localStorage.removeItem('cartSolftdrink');
+    localStorage.removeItem('cartFruit');
+    localStorage.removeItem('cartOther');
+  }
+
+  // ✅ Optional debug log
+  showTopup(): void {
+    console.log('Top-up flow started');
+  }
+
+  // ✅ Delivery or Pickup Selection
+  selectOption(option: string): void {
+    this.choice = option;
+    this.step = 2; // Proceed to payment method selection
+  }
+
+  // ✅ Payment Method Final Step
+  pay(method: string): void {
+    console.log(`Payment selected: ${method}`);
+
+    if (method === 'QR Pay') {
+      this.showQRCode = true; // ✅ Show QR section
+      this.step = 0; // Close modal
+    } else if (method === 'Cash') {
+      alert(
+        `✅ Payment successful via Cash. Thank you for your order!\n\nTotal Price: ${this.getGrandTotal()} $\nTotal Quantity: ${this.getTotalQty()}`
+      );
+    } else {
+      alert(`✅ Payment successful via ${method}. Thank you for your order!`);
+      this.clearCart();
+      this.step = 0;
+      location.reload();
+    }
+  }
+
+  // ✅ Back Button
+  back(): void {
+    this.step = 1;
+    this.choice = '';
+  }
+
+  printQR() {
+    const printContents = document.getElementById('print-section')?.innerHTML;
+
+    if (!printContents) {
+      console.error('Print section not found!');
+      return;
+    }
+
+    // Optional: alert for testing
+    alert('Printing receipt...');
+
+    const printWindow = window.open('', '', 'width=800,height=600');
+    if (!printWindow) {
+      console.error('Failed to open print window');
+      return;
+    }
+
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>Receipt</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+          th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+          th { background-color: #f4f4f4; }
+        </style>
+      </head>
+      <body>
+        ${printContents},
+        <p>Total Price: ${this.getGrandTotal()} $</p>
+        <p>Total Quantity: ${this.getTotalQty()}</p>
+        
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+
+    // Optional: clear cart after printing
+    this.clearCart();
+    location.reload();
   }
 }
