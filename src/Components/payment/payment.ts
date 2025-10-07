@@ -15,10 +15,12 @@ import { Typeother } from '../typeother/typeother';
 })
 export class Payment implements OnInit {
   loggedIn = false;
-  step: number = 0; // 0 = summary, 1 = delivery/pickup, 2 = payment method
-  choice: string = ''; // 'delivery' or 'pickup'
-  qrImage: string = '/aba.png'; // QR code image path (served from public folder)
-  showQRCode: boolean = false; // Control QR code visibility
+  step = 0; // 0 = summary, 1 = delivery/pickup, 2 = payment method
+  choice = ''; // 'delivery' or 'pickup'
+  qrImage = '/aba.png'; // QR image
+  imgCheck = '/check.png'; // Success check image
+  showQRCode = false;
+  showCash = false;
   total_Products: any[] = [];
 
   constructor(private router: Router) {}
@@ -29,38 +31,35 @@ export class Payment implements OnInit {
     const drinks = JSON.parse(localStorage.getItem('cartSolftdrink') || '[]');
     const fruits = JSON.parse(localStorage.getItem('cartFruit') || '[]');
     const others = JSON.parse(localStorage.getItem('cartOther') || '[]');
-
     this.total_Products = [...food, ...drinks, ...fruits, ...others];
   }
 
-  // ✅ Total Quantity
+  // Total Quantity
   getTotalQty(): number {
     return this.total_Products.reduce((sum, item) => sum + item.qty, 0);
   }
 
-  // ✅ Grand Total Price
+  // Grand Total Price
   getGrandTotal(): number {
     return this.total_Products.reduce((sum, item) => sum + item.price * item.qty, 0);
   }
 
-  // ✅ Handle "Pay Now" button
+  // Pay Now
   payNow() {
     if (this.getGrandTotal() === 0) {
       alert('🛑 Your cart is empty. Please add some items.');
       this.router.navigate(['/home']);
       return;
     }
-
     if (!this.loggedIn) {
       alert('⚠️ You must be logged in to proceed with payment.');
       this.router.navigate(['/login']);
       return;
     }
-
-    this.step = 1; // Proceed to delivery/pickup step
+    this.step = 1;
   }
 
-  // ✅ Cancel Order Flow
+  // Cancel Order
   cancelOrder() {
     if (confirm('Are you sure you want to cancel your order?')) {
       this.clearCart();
@@ -69,90 +68,179 @@ export class Payment implements OnInit {
     }
   }
 
-  // ✅ Clear Cart Data
+  // Clear Cart
   clearCart(): void {
-    localStorage.removeItem('cartFood');
-    localStorage.removeItem('cartSolftdrink');
-    localStorage.removeItem('cartFruit');
-    localStorage.removeItem('cartOther');
+    ['cartFood', 'cartSolftdrink', 'cartFruit', 'cartOther'].forEach((key) =>
+      localStorage.removeItem(key)
+    );
     this.total_Products = [];
   }
 
-  // ✅ Delivery or Pickup Selection
+  // Delivery / Pickup
   selectOption(option: string): void {
     this.choice = option;
-    this.step = 2; // Proceed to payment method selection
+    this.step = 2;
   }
 
-  // ✅ Payment Method Final Step
+  // Payment Method
   pay(method: string): void {
-    console.log(`Payment selected: ${method}`);
-
     if (method === 'QR Pay') {
-      this.showQRCode = true; // Show QR section
-      this.step = 0; // Close modal
+      this.showQRCode = true;
+      this.step = 0;
+    } else if (method === 'Cash') {
+      this.showCash = true;
+      this.step = 0;
     } else {
       alert(
-        `✅ Payment successful via ${method}. Thank you for your order!\n\nTotal Price: ${this.getGrandTotal()} $\nTotal Quantity: ${this.getTotalQty()}`
+        `✅ Payment successful via ${method}. Thank you!\nTotal: ${this.getGrandTotal()} USD\nQuantity: ${this.getTotalQty()}`
       );
       this.clearCart();
-      this.step = 0;
       location.reload();
     }
   }
 
-  // ✅ Back Button
+  // Back to step 1
   back(): void {
     this.step = 1;
     this.choice = '';
   }
 
-  // ✅ TrackBy for ngFor
+  // TrackBy for ngFor
   trackById(index: number, item: any): any {
     return item.id;
   }
 
-  // ✅ Print QR Receipt
+  // Print QR Receipt
   printQR() {
-    const printContents = document.getElementById('print-section')?.innerHTML;
-
-    if (!printContents) {
-      console.error('Print section not found!');
+    alert('Mobile receipt not available for cash payments. A printed receipt will be provided.');
+    if (!this.total_Products.length) {
+      alert('No products to print!');
       return;
     }
+
+    const rows = this.total_Products
+      .map(
+        (p) => `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.name}</td>
+        <td>${p.qty}</td>
+        <td>${(p.price * p.qty).toFixed(2)} USD</td>
+      </tr>`
+      )
+      .join('');
 
     const printWindow = window.open('', '', 'width=800,height=600');
-    if (!printWindow) {
-      console.error('Failed to open print window');
-      return;
-    }
+    if (!printWindow) return;
 
     printWindow.document.write(`
       <html>
         <head>
-          <title>Receipt</title>
+          <title>QR Payment Receipt</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+            body { font-family: Arial; padding: 20px; }
+            h2 { text-align: center; color: #2563eb; margin-bottom: 20px; }
+            table { border-collapse: collapse; width: 100%; }
             th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
             th { background-color: #f4f4f4; }
+            tr:nth-child(even) { background-color: #fafafa; }
+            .summary { text-align: right; font-weight: bold; margin-top: 20px; }
           </style>
         </head>
         <body>
-          ${printContents}
-          <p>Total Price: ${this.getGrandTotal()} $</p>
-          <p>Total Quantity: ${this.getTotalQty()}</p>
+          <h2>📱 QR Payment Receipt</h2>
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Product</th><th>Qty</th><th>Price</th></tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <div class="summary">
+            <p>Total Quantity: ${this.getTotalQty()}</p>
+            <p>Total Price: ${this.getGrandTotal().toFixed(2)} USD</p>
+            <p>✅ Payment Received — Thank You!</p>
+          </div>
         </body>
       </html>
     `);
 
     printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+      this.clearCart();
+      location.reload();
+    };
+  }
 
-    // Optional: clear cart after printing
-    this.clearCart();
-    location.reload();
+  // Print Cash Receipt
+  printCash() {
+    alert('Mobile receipt not available for cash payments. A printed receipt will be provided.');
+    if (!this.total_Products.length) {
+      alert('No products to print!');
+      return;
+    }
+
+    // Build receipt rows
+    const rows = this.total_Products
+      .map(
+        (p) => `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.name}</td>
+        <td>${p.qty}</td>
+        <td>${(p.price * p.qty).toFixed(2)} USD</td>
+      </tr>`
+      )
+      .join('');
+
+    // Open temporary window
+    const printWindow = window.open('', '', 'width=800,height=600');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>Cash Payment Receipt</title>
+        <style>
+          body { font-family: Arial; padding: 20px; }
+          h2 { text-align: center; color: #16a34a; margin-bottom: 20px; }
+          table { border-collapse: collapse; width: 100%; }
+          th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+          th { background-color: #f4f4f4; }
+          tr:nth-child(even) { background-color: #fafafa; }
+          .summary { text-align: right; font-weight: bold; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <h2>💵 Cash Payment Receipt</h2>
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Product</th><th>Qty</th><th>Price</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="summary">
+          <p>Total Quantity: ${this.getTotalQty()}</p>
+          <p>Total Price: ${this.getGrandTotal().toFixed(2)} USD</p>
+          <p>✅ Payment Received — Thank You!</p>
+        </div>
+      </body>
+    </html>
+  `);
+    if (this.showQRCode === false) {
+      alert('Mobile receipt not available for cash payments. A printed receipt will be provided.');
+    }
+
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+      this.showCash = false;
+      this.clearCart();
+      location.reload();
+    };
   }
 }
