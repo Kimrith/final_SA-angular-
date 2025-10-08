@@ -1,10 +1,11 @@
 import { CurrencyPipe, NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-typeoffood',
   standalone: true, // ✅ important if you use it directly in other components
-  imports: [NgFor, NgIf, CurrencyPipe],
+  imports: [NgFor, NgIf, CurrencyPipe, RouterLink],
   templateUrl: './typeoffood.html',
   styleUrl: './typeoffood.css',
 })
@@ -20,7 +21,7 @@ export class Typeoffood {
   }
 
   paymetn() {
-    alert('💳 Payment started!');
+    alert('');
   }
 
   increaseQty(item: any): void {

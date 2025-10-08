@@ -38,10 +38,10 @@ export const routes: Routes = [
         path: 'contact',
         component: Contact,
       },
-      {
-        path: 'menu',
-        component: Menu,
-      },
+      // {
+      //   path: 'menu',
+      //   component: Menu,
+      // },
       {
         path: 'food',
         component: Food,

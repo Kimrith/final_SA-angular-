@@ -12,7 +12,7 @@ import { RouterLink } from '@angular/router';
 export class Food {
   products_foods = [
     {
-      img: 'https://webassets.meowwolf.com/cdn.prod/5daf07de1a61d008bdf579d8/60368a3dd74b5d4fadcd4091_RhkaUa-ZTSfJj0Rv5rRJP9wbPnQ-htAow9ZhXqTihsYNv3wu8qMMUuWejYXjyBFf_sVwfV4inStfS-A84qvs6WsgOwOuj2EC4zyi0mFHGih9PoCgni4ijSK_0_IYUWb7xH0XtaEy.jpeg',
+      img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgv47RNBjf75kuRvrpNhq9PIPrUW21FVYsxA&s',
       name: 'Food 1',
       price: 25,
       description: 'A beautiful piece of artwork from Meow Wolf.',

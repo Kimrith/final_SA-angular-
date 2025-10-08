@@ -1,10 +1,11 @@
 import { CurrencyPipe, NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-typesolfdrink',
   standalone: true,
-  imports: [NgIf, NgFor, CurrencyPipe],
+  imports: [NgIf, NgFor, CurrencyPipe, RouterLink],
   templateUrl: './typesolfdrink.html',
   styleUrls: ['./typesolfdrink.css'],
 })

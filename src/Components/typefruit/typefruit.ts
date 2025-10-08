@@ -1,9 +1,10 @@
 import { CurrencyPipe, NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-typefruit',
-  imports: [CurrencyPipe, NgIf, NgFor],
+  imports: [CurrencyPipe, NgIf, NgFor, RouterLink],
   templateUrl: './typefruit.html',
   styleUrl: './typefruit.css',
 })

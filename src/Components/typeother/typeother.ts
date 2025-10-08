@@ -1,9 +1,10 @@
 import { CurrencyPipe, NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-typeother',
-  imports: [CurrencyPipe, NgIf, NgFor],
+  imports: [CurrencyPipe, NgIf, NgFor, RouterLink],
   templateUrl: './typeother.html',
   styleUrl: './typeother.css',
 })
