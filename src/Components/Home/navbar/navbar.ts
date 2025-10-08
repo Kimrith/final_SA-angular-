@@ -58,10 +58,12 @@ export class Navbar implements OnInit {
   handleLoginLogout() {
     if (this.loggedIn) {
       // Logout
-      localStorage.removeItem('isLoggedIn');
+      // localStorage.removeItem('isLoggedIn');
       this.loggedIn = false;
+      localStorage.setItem('isLoggedIn', 'false');
       localStorage.removeItem('user');
       window.dispatchEvent(new Event('storage'));
+      localStorage.removeItem('phone_number');
       this.router.navigate(['/login']);
     } else {
       // Go to login

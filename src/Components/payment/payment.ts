@@ -26,7 +26,23 @@ export class Payment implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit() {
+    this.checkLogin();
+    this.loadCart();
+
+    // 🔄 Update login status dynamically when user logs in/out
+    window.addEventListener('storage', () => {
+      this.checkLogin();
+      this.loadCart();
+    });
+  }
+
+  // ✅ Check if user is logged in
+  checkLogin() {
     this.loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  }
+
+  // 🛒 Load all cart products
+  loadCart() {
     const food = JSON.parse(localStorage.getItem('cartFood') || '[]');
     const drinks = JSON.parse(localStorage.getItem('cartSolftdrink') || '[]');
     const fruits = JSON.parse(localStorage.getItem('cartFruit') || '[]');
@@ -34,32 +50,39 @@ export class Payment implements OnInit {
     this.total_Products = [...food, ...drinks, ...fruits, ...others];
   }
 
-  // Total Quantity
+  // 🧮 Total Quantity
   getTotalQty(): number {
-    return this.total_Products.reduce((sum, item) => sum + item.qty, 0);
+    return this.total_Products.reduce((sum, item) => sum + (item.qty || 0), 0);
   }
 
-  // Grand Total Price
+  // 💵 Grand Total Price
   getGrandTotal(): number {
-    return this.total_Products.reduce((sum, item) => sum + item.price * item.qty, 0);
+    return this.total_Products.reduce((sum, item) => sum + (item.price * item.qty || 0), 0);
   }
 
-  // Pay Now
+  // 💳 Pay Now Button
   payNow() {
+    console.log('🟢 payNow clicked');
+    console.log('loggedIn:', this.loggedIn);
+    console.log('grand total:', this.getGrandTotal());
+
     if (this.getGrandTotal() === 0) {
       alert('🛑 Your cart is empty. Please add some items.');
       this.router.navigate(['/home']);
       return;
     }
+
     if (!this.loggedIn) {
       alert('⚠️ You must be logged in to proceed with payment.');
       this.router.navigate(['/login']);
       return;
     }
+
+    // ✅ If all is good, move to step 1
     this.step = 1;
   }
 
-  // Cancel Order
+  // ❌ Cancel Order
   cancelOrder() {
     if (confirm('Are you sure you want to cancel your order?')) {
       this.clearCart();
@@ -68,7 +91,7 @@ export class Payment implements OnInit {
     }
   }
 
-  // Clear Cart
+  // 🧹 Clear All Carts
   clearCart(): void {
     ['cartFood', 'cartSolftdrink', 'cartFruit', 'cartOther'].forEach((key) =>
       localStorage.removeItem(key)
@@ -76,13 +99,13 @@ export class Payment implements OnInit {
     this.total_Products = [];
   }
 
-  // Delivery / Pickup
+  // 🚚 Delivery or 🏬 Pickup
   selectOption(option: string): void {
     this.choice = option;
     this.step = 2;
   }
 
-  // Payment Method
+  // 💰 Payment Method
   pay(method: string): void {
     if (method === 'QR Pay') {
       this.showQRCode = true;
@@ -99,20 +122,19 @@ export class Payment implements OnInit {
     }
   }
 
-  // Back to step 1
+  // 🔙 Back Button
   back(): void {
     this.step = 1;
     this.choice = '';
   }
 
-  // TrackBy for ngFor
+  // 🧾 Track items
   trackById(index: number, item: any): any {
     return item.id;
   }
 
-  // Print QR Receipt
+  // 🖨 Print QR Receipt
   printQR() {
-    alert('Mobile receipt not available for cash payments. A printed receipt will be provided.');
     if (!this.total_Products.length) {
       alert('No products to print!');
       return;
@@ -174,15 +196,13 @@ export class Payment implements OnInit {
     };
   }
 
-  // Print Cash Receipt
+  // 🖨 Print Cash Receipt
   printCash() {
-    alert('Mobile receipt not available for cash payments. A printed receipt will be provided.');
     if (!this.total_Products.length) {
       alert('No products to print!');
       return;
     }
 
-    // Build receipt rows
     const rows = this.total_Products
       .map(
         (p) => `
@@ -195,43 +215,39 @@ export class Payment implements OnInit {
       )
       .join('');
 
-    // Open temporary window
     const printWindow = window.open('', '', 'width=800,height=600');
     if (!printWindow) return;
 
     printWindow.document.write(`
-    <html>
-      <head>
-        <title>Cash Payment Receipt</title>
-        <style>
-          body { font-family: Arial; padding: 20px; }
-          h2 { text-align: center; color: #16a34a; margin-bottom: 20px; }
-          table { border-collapse: collapse; width: 100%; }
-          th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-          th { background-color: #f4f4f4; }
-          tr:nth-child(even) { background-color: #fafafa; }
-          .summary { text-align: right; font-weight: bold; margin-top: 20px; }
-        </style>
-      </head>
-      <body>
-        <h2>💵 Cash Payment Receipt</h2>
-        <table>
-          <thead>
-            <tr><th>ID</th><th>Product</th><th>Qty</th><th>Price</th></tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-        <div class="summary">
-          <p>Total Quantity: ${this.getTotalQty()}</p>
-          <p>Total Price: ${this.getGrandTotal().toFixed(2)} USD</p>
-          <p>✅ Payment Received — Thank You!</p>
-        </div>
-      </body>
-    </html>
-  `);
-    if (this.showQRCode === false) {
-      alert('Mobile receipt not available for cash payments. A printed receipt will be provided.');
-    }
+      <html>
+        <head>
+          <title>Cash Payment Receipt</title>
+          <style>
+            body { font-family: Arial; padding: 20px; }
+            h2 { text-align: center; color: #16a34a; margin-bottom: 20px; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+            th { background-color: #f4f4f4; }
+            tr:nth-child(even) { background-color: #fafafa; }
+            .summary { text-align: right; font-weight: bold; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <h2>💵 Cash Payment Receipt</h2>
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Product</th><th>Qty</th><th>Price</th></tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <div class="summary">
+            <p>Total Quantity: ${this.getTotalQty()}</p>
+            <p>Total Price: ${this.getGrandTotal().toFixed(2)} USD</p>
+            <p>✅ Payment Received — Thank You!</p>
+          </div>
+        </body>
+      </html>
+    `);
 
     printWindow.document.close();
     printWindow.onload = () => {
