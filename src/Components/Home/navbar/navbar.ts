@@ -3,20 +3,23 @@ import { Router } from '@angular/router';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Carousel } from '../carousel/carousel';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [NgClass, NgFor, NgIf, RouterLink, RouterLinkActive, Carousel],
+  imports: [NgClass, NgFor, NgIf, RouterLink, RouterLinkActive, Carousel, FormsModule],
   templateUrl: './navbar.html',
-  styleUrl: './navbar.css',
+  styleUrls: ['./navbar.css'], // <- fixed property name
 })
 export class Navbar implements OnInit {
   menuOpen = false;
   loggedIn = false;
   user_name: string = '';
+  searchValue: string = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private http: HttpClient) {}
 
   navItems = [
     { path: 'home', label: 'Home' },
@@ -29,7 +32,6 @@ export class Navbar implements OnInit {
   ngOnInit() {
     this.checkLoginStatus();
 
-    // 👂 Listen for login/logout changes from anywhere
     window.addEventListener('storage', () => {
       this.checkLoginStatus();
     });
@@ -39,7 +41,7 @@ export class Navbar implements OnInit {
 
     const savedImage = localStorage.getItem('imgUpload');
     if (savedImage) {
-      this.imgUpload = savedImage; // Load the image URL from localStorage
+      this.imgUpload = savedImage;
     }
   }
 
@@ -57,16 +59,15 @@ export class Navbar implements OnInit {
 
   handleLoginLogout() {
     if (this.loggedIn) {
-      // Logout
-      // localStorage.removeItem('isLoggedIn');
       this.loggedIn = false;
       localStorage.setItem('isLoggedIn', 'false');
       localStorage.removeItem('user');
       window.dispatchEvent(new Event('storage'));
       localStorage.removeItem('phone_number');
       this.router.navigate(['/login']);
+      localStorage.removeItem('imgUpload');
+      localStorage.removeItem('address');
     } else {
-      // Go to login
       this.router.navigate(['/login']);
     }
     localStorage.removeItem('imgUpload');
@@ -74,7 +75,7 @@ export class Navbar implements OnInit {
   }
 
   showTopup = false;
-  imgUpload: string | null = null; // To store the image URL locally
+  imgUpload: string | null = null;
 
   toggleTopup() {
     this.showTopup = !this.showTopup;
@@ -83,7 +84,6 @@ export class Navbar implements OnInit {
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
-      // Check size (example: max 1MB = 1,000,000 bytes)
       if (file.size > 1000000) {
         console.warn('File too large, using default image instead.');
         this.imgUpload =
@@ -119,5 +119,11 @@ export class Navbar implements OnInit {
     localStorage.removeItem('imgUpload');
     window.location.reload();
   }
-  // To load the image from localStorage when the component initializes (e.g., on page reload)
+
+  // ---------- Search handler ----------
+  searchProduct(value: string) {
+    this.http.get(`http://localhost:3000/api/product?search=${value}`).subscribe((res: any) => {
+      console.log(res.products); // You’ll get filtered products here
+    });
+  }
 }

@@ -11,6 +11,7 @@ import { SolfDrink } from '../Components/solf-drink/solf-drink';
 import { Fruit } from '../Components/fruit/fruit';
 import { Other } from '../Components/other/other';
 import { Payment } from '../Components/payment/payment';
+import { CategoryDetailt } from '../Components/category-detail/category-detail';
 
 export const routes: Routes = [
   {
@@ -42,6 +43,10 @@ export const routes: Routes = [
       //   path: 'menu',
       //   component: Menu,
       // },
+      {
+        path: 'category/:id',
+        component: CategoryDetailt,
+      },
       {
         path: 'food',
         component: Food,

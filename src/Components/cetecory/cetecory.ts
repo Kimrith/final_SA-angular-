@@ -1,18 +1,27 @@
 import { NgClass, NgFor } from '@angular/common';
-import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-cetecory',
-  imports: [NgFor, NgClass, RouterLink],
+  imports: [NgFor, RouterLink],
   templateUrl: './cetecory.html',
-  styleUrl: './cetecory.css',
+  styleUrls: ['./cetecory.css'],
 })
-export class Cetecory {
-  products = [
-    { path: 'food', id: 1, name: 'Food' },
-    { path: 'solf_drink', id: 1, name: 'Solf Drink' },
-    { path: 'fruit', id: 1, name: 'Fruit' },
-    { path: 'other', id: 8, name: 'Other' },
-  ];
+export class Cetecory implements OnInit {
+  categories: any[] = [];
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.http.get<{ categories: any[] }>('http://localhost:3000/api/cetecory').subscribe({
+      next: (data) => {
+        this.categories = data.categories;
+      },
+      error: (err) => {
+        console.error('Failed to fetch categories/products', err);
+      },
+    });
+  }
 }

@@ -15,62 +15,55 @@ export class Login {
   emailInput = '';
   Pss = '';
   ComPss = '';
-  phone_num = ''; // Keep as string to preserve leading zeros
+  phone_num = '';
+  addressUser = '';
 
   showUsernameError = false;
   showPhoneError = false;
   showEmailError = false;
   showPasswordError = false;
   showConfirmError = false;
+  showAddress = false;
 
   constructor(private router: Router) {}
 
   sumAdd() {
-    // Reset all errors
+    // Reset errors
     this.showUsernameError = false;
     this.showPhoneError = false;
     this.showEmailError = false;
     this.showPasswordError = false;
     this.showConfirmError = false;
+    this.showAddress = false;
 
-    // Username validation
-    if (this.usernameInput.trim() === '') {
-      this.showUsernameError = true;
-    }
+    // Validate fields
+    if (this.usernameInput.trim() === '') this.showUsernameError = true;
 
-    // 📞 Phone validation — must be exactly 9 digits
     const phonePattern = /^[0-9]{9}$/;
-    if (!phonePattern.test(this.phone_num.trim())) {
-      this.showPhoneError = true;
-    }
+    if (!phonePattern.test(this.phone_num.trim())) this.showPhoneError = true;
 
-    // 📧 Email validation
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (this.emailInput.trim() === '' || !emailPattern.test(this.emailInput)) {
+    if (this.emailInput.trim() === '' || !emailPattern.test(this.emailInput))
       this.showEmailError = true;
-    }
 
-    // 🔒 Password validation
-    if (this.Pss.trim() === '') {
-      this.showPasswordError = true;
-    }
+    if (this.Pss.trim() === '') this.showPasswordError = true;
+    if (this.ComPss.trim() === '' || this.Pss !== this.ComPss) this.showConfirmError = true;
 
-    // ✅ Confirm password validation
-    if (this.ComPss.trim() === '' || this.Pss !== this.ComPss) {
-      this.showConfirmError = true;
-    }
+    if (this.addressUser.trim() === '') this.showAddress = true;
 
-    // 🚀 If all valid
+    // If all valid
     if (
       !this.showUsernameError &&
       !this.showPhoneError &&
       !this.showEmailError &&
       !this.showPasswordError &&
-      !this.showConfirmError
+      !this.showConfirmError &&
+      !this.showAddress
     ) {
       localStorage.setItem('user', this.usernameInput);
       localStorage.setItem('phone_number', this.phone_num);
       localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('address', this.addressUser);
       alert('✅ Login successful!');
       window.dispatchEvent(new Event('storage'));
       this.router.navigate(['/home']);
