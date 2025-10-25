@@ -24,10 +24,9 @@ export class Setting implements OnInit {
   isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
   ngOnInit(): void {
-    if (!this.isLoggedIn) {
-      this.router.navigate(['/login']);
-      return;
-    }
+    // if (!this.isLoggedIn) {
+    //   this.router.navigate(['/login']);
+    // }
 
     this.imgUpload = localStorage.getItem('imgUpload');
     this.username = localStorage.getItem('user') || '';

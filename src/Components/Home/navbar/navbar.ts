@@ -68,6 +68,9 @@ export class Navbar implements OnInit {
       this.router.navigate(['/login']);
       localStorage.removeItem('imgUpload');
       localStorage.removeItem('address');
+      localStorage.removeItem('Com_password');
+      localStorage.removeItem('emailInput');
+      localStorage.removeItem('password');
     } else {
       this.router.navigate(['/login']);
     }
