@@ -12,6 +12,7 @@ import { Fruit } from '../Components/fruit/fruit';
 import { Other } from '../Components/other/other';
 import { Payment } from '../Components/payment/payment';
 import { CategoryDetailt } from '../Components/category-detail/category-detail';
+import { Setting } from '../Components/Home/setting/setting';
 
 export const routes: Routes = [
   {
@@ -46,6 +47,10 @@ export const routes: Routes = [
       {
         path: 'category/:id',
         component: CategoryDetailt,
+      },
+      {
+        path: 'setting',
+        component: Setting,
       },
       {
         path: 'food',

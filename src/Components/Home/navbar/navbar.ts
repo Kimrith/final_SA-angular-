@@ -27,6 +27,7 @@ export class Navbar implements OnInit {
     { path: 'service', label: 'Services' },
     { path: 'contact', label: 'Contact' },
     { path: 'payment', label: 'Payment' },
+    { path: 'setting', label: 'Setting' },
   ];
 
   ngOnInit() {
@@ -122,6 +123,10 @@ export class Navbar implements OnInit {
 
   // ---------- Search handler ----------
   searchProduct(value: string) {
+    if (!value.trim()) return;
+
+    // Navigate to category-detail but pass search as query param
+    this.router.navigate(['/category/:id'], { queryParams: { search: value } });
     this.http.get(`http://localhost:3000/api/product?search=${value}`).subscribe((res: any) => {
       console.log(res.products); // You’ll get filtered products here
     });

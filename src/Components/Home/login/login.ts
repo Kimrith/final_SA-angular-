@@ -64,7 +64,10 @@ export class Login {
       localStorage.setItem('phone_number', this.phone_num);
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('address', this.addressUser);
-      alert('✅ Login successful!');
+      localStorage.setItem('password', this.Pss);
+      localStorage.setItem('Com_password', this.ComPss);
+      localStorage.setItem('emailInput', this.emailInput);
+      alert('Login successful!');
       window.dispatchEvent(new Event('storage'));
       this.router.navigate(['/home']);
     }
