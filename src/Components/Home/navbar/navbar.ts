@@ -113,6 +113,36 @@ export class Navbar implements OnInit {
     if (this.imgUpload) {
       localStorage.setItem('imgUpload', this.imgUpload);
       console.log('Image saved to localStorage');
+
+      {
+        const userData = {
+          profile_img: this.imgUpload,
+          name_user: localStorage.getItem('user') || '',
+          phone_number: localStorage.getItem('phone_number') || '',
+          email: localStorage.getItem('emailInput') || '',
+          password: localStorage.getItem('password') || '',
+          address: localStorage.getItem('address') || '',
+        };
+
+        // Send POST to backend
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+          alert('User ID not found. Please login first.');
+          return;
+        }
+
+        this.http.put(`http://localhost:3000/api/login/${userId}`, userData).subscribe({
+          next: (res: any) => {
+            alert('Profile updated successfully!');
+            localStorage.setItem('imgUpload', this.imgUpload!);
+            this.router.navigate(['/home']);
+          },
+          error: (err) => {
+            console.error(err);
+            alert('Something went wrong! Check backend.');
+          },
+        });
+      }
     } else {
       console.log('No image selected yet.');
     }

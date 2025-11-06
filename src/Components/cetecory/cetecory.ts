@@ -2,10 +2,11 @@ import { NgClass, NgFor } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TrenProduct } from '../tren-product/tren-product';
 
 @Component({
   selector: 'app-cetecory',
-  imports: [NgFor, RouterLink],
+  imports: [NgFor, RouterLink, TrenProduct],
   templateUrl: './cetecory.html',
   styleUrls: ['./cetecory.css'],
 })

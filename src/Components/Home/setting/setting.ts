@@ -47,6 +47,7 @@ export class Setting implements OnInit {
     localStorage.setItem('address', this.address);
 
     alert('✅ Changes saved successfully!');
+    location.reload();
   }
 
   remove() {

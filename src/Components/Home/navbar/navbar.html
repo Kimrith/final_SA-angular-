@@ -10,7 +10,11 @@
   <div class="max-w-screen-xl mx-auto flex items-center justify-between px-4 py-3">
     <!-- Logo -->
     <div class="flex items-center space-x-2">
-      <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Logo" />
+      <img
+        src="https://i.pinimg.com/1200x/3e/ee/c7/3eeec74e2209d34daed191a18384bed2.jpg"
+        class="w-12 rounded-full"
+        alt="Logo"
+      />
       <span class="text-xl font-bold">Mart </span>
     </div>
 
@@ -24,12 +28,12 @@
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path
+          <!-- <path
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
             d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1016.65 16.65z"
-          />
+          /> -->
         </svg>
         <input
           type="text"
@@ -60,19 +64,19 @@
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path
+            <!-- <path
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
               d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1016.65 16.65z"
-            />
+            /> -->
           </svg>
           <input
             type="text"
             placeholder="Search Product..."
             [(ngModel)]="searchValue"
             (keyup.enter)="searchProduct(searchValue)"
-            class="w-64 pl-10 pr-4 py-2 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-64 pl-10 ml-10 pr-4 py-2 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </li>
@@ -96,12 +100,12 @@
           (click)="handleLoginLogout()"
           class="text-gray-800 hover:text-red-600 transition duration-200 cursor-pointer"
         >
-          {{ loggedIn ? 'Logout' : 'Login' }}
+          {{ loggedIn ? 'Logout' : 'Register' }}
         </a>
       </li>
 
       <!-- Profile -->
-      <li class="ml-10 flex items-center">
+      <li class="ml-1 flex items-center">
         <div class="flex items-center gap-3 rounded-lg">
           <img
             (click)="loggedIn ? toggleTopup() : null"
@@ -201,7 +205,7 @@
           (click)="handleLoginLogout(); closeMenu()"
           class="text-gray-800 hover:text-red-600 transition duration-200 cursor-pointer"
         >
-          {{ loggedIn ? 'Logout' : 'Login' }}
+          {{ loggedIn ? 'Logout' : 'Register' }}
         </a>
       </li>
     </ul>

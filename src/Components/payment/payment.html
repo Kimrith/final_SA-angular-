@@ -196,7 +196,7 @@
             <tr *ngFor="let product of total_Products; trackBy: trackById" class="even:bg-gray-50">
               <td class="px-4 py-2 border-b border-gray-200">{{ product.id }}</td>
               <td class="px-4 py-2 border-b border-gray-200">{{ product.name_product }}</td>
-              <td class="px-4 py-2 border-b border-gray-200 text-center">{{ product.qty }}</td>
+              <td class="px-4 py-2 border-b border-gray-200 text-center">{{ product.qtyAdded }}</td>
               <td class="px-4 py-2 border-b border-gray-200 text-right">
                 {{ product.price | currency : 'USD' }}
               </td>
@@ -261,7 +261,7 @@
         <tr *ngFor="let p of total_Products">
           <td class="border border-gray-300 px-2 py-1">{{ p.id }}</td>
           <td class="border border-gray-300 px-2 py-1">{{ p.name }}</td>
-          <td class="border border-gray-300 px-2 py-1 text-center">{{ p.qty }}</td>
+          <td class="border border-gray-300 px-2 py-1 text-center">{{ p.qtyAdded }}</td>
           <td class="border border-gray-300 px-2 py-1 text-right">
             {{ p.price * p.qty | currency : 'USD' }}
           </td>
