@@ -65,7 +65,8 @@
             class="bg-gray-50 aspect-square flex items-center justify-center p-6 transition-transform duration-300 group-hover:bg-gray-100"
           >
             <img
-              [src]="p.img"
+              [src]="p.img?.startsWith('http') ? p.img : 'http://localhost:3000' + p.img"
+              (error)="p.img = '/assets/default.jpg'"
               [alt]="p.name_product"
               class="max-h-40 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               onerror="this.src='https://placehold.co/150?text=No+Image&font=roboto'"

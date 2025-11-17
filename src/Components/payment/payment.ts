@@ -13,9 +13,11 @@ import { HttpClient } from '@angular/common/http';
 export class Payment implements OnInit {
   loggedIn = false;
   step = 0;
-  choice = ''; // delivery or pickup
+  choice = '';
+
   qrImage = '/aba.png';
   imgCheck = '/check.png';
+
   showQRCode = false;
   showCash = false;
 
@@ -24,26 +26,65 @@ export class Payment implements OnInit {
   totalPrice = 0;
   toalPrice_product = 0;
   totalPriceWithDiscount = 0;
+  payment_method = '';
+
+  orders: any[] = []; // ✅ needed for checking status
 
   constructor(private router: Router, private http: HttpClient) {}
 
   ngOnInit() {
     this.checkLogin();
     this.loadCart();
+    this.loadMyOrders(); // load user orders
 
-    // Update login & cart when storage changes
     window.addEventListener('storage', () => {
       this.checkLogin();
       this.loadCart();
     });
   }
 
-  // ✅ Check login
+  // ---------------------------------------------------
+  // 🔥 Show alert to customer when admin confirms/cancels
+  // ---------------------------------------------------
+  loadMyOrders() {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+
+    this.http.get(`http://localhost:3000/api/order/user/${userId}`).subscribe({
+      next: (data: any) => {
+        this.orders = data;
+        this.checkStatusAlerts();
+      },
+      error: (err) => console.error(err),
+    });
+  }
+
+  checkStatusAlerts() {
+    if (!this.orders.length) return;
+
+    const lastStatus = localStorage.getItem('lastOrderStatus');
+    const latestOrder = this.orders[this.orders.length - 1];
+    const currentStatus = latestOrder.status;
+
+    if (currentStatus === lastStatus) return;
+
+    if (currentStatus === 'confirmed') {
+      alert('✅ Good news! Your order has been CONFIRMED!');
+    } else if (currentStatus === 'cancelled') {
+      alert('❌ Sorry! Your order has been CANCELLED.');
+    }
+
+    localStorage.setItem('lastOrderStatus', currentStatus);
+  }
+
+  // ---------------------------------------------------
+  // CUSTOMER PAYMENT SYSTEM
+  // ---------------------------------------------------
+
   checkLogin() {
     this.loggedIn = localStorage.getItem('isLoggedIn') === 'true';
   }
 
-  // 🛒 Load all cart products
   loadCart() {
     this.totalQty = JSON.parse(localStorage.getItem('totalqty') || '0');
     this.totalPrice = JSON.parse(localStorage.getItem('totalprice') || '0');
@@ -52,11 +93,11 @@ export class Payment implements OnInit {
     this.total_Products = JSON.parse(localStorage.getItem('cart') || '[]');
   }
 
-  getTotalQty(): number {
+  getTotalQty() {
     return this.totalQty;
   }
 
-  getGrandTotal(): number {
+  getGrandTotal() {
     return this.totalPriceWithDiscount;
   }
 
@@ -77,27 +118,25 @@ export class Payment implements OnInit {
   updateCartItem(product: any) {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const index = cart.findIndex((item: any) => item._id === product._id);
+
     if (index !== -1) {
-      if (product.qtyAdded === 0) {
-        cart.splice(index, 1);
-      } else {
-        cart[index].qtyAdded = product.qtyAdded;
-      }
+      if (product.qtyAdded === 0) cart.splice(index, 1);
+      else cart[index].qtyAdded = product.qtyAdded;
     }
+
     localStorage.setItem('cart', JSON.stringify(cart));
     this.loadCart();
   }
 
-  // 💳 Pay Now
-  payNow() {
+  payNow(): void {
     if (this.getGrandTotal() === 0) {
-      alert('🛑 Your cart is empty. Please add some items.');
+      alert('🛑 Your cart is empty.');
       this.router.navigate(['/home']);
       return;
     }
 
     if (!this.loggedIn) {
-      alert('⚠️ You must be logged in to proceed with payment.');
+      alert('⚠️ Please login first.');
       this.router.navigate(['/login']);
       return;
     }
@@ -105,106 +144,111 @@ export class Payment implements OnInit {
     this.step = 1;
   }
 
-  // ❌ Cancel order
   cancelOrder() {
     if (confirm('Are you sure you want to cancel your order?')) {
       this.clearCart();
-      alert('❌ Order canceled!');
+      alert('❌ Order canceled');
       location.reload();
     }
   }
 
-  clearCart(): void {
-    ['cartFood', 'cartSolftdrink', 'cartFruit', 'cartOther'].forEach((key) =>
-      localStorage.removeItem(key)
+  clearCart() {
+    ['cartFood', 'cartSolftdrink', 'cartFruit', 'cartOther'].forEach((k) =>
+      localStorage.removeItem(k)
     );
-    ['totalqty', 'totalprice', 'toalPrice_product', 'totalpriceWithDiscount', 'cart'].forEach(
-      (key) => localStorage.removeItem(key)
+    ['totalqty', 'totalprice', 'toalPrice_product', 'totalpriceWithDiscount', 'cart'].forEach((k) =>
+      localStorage.removeItem(k)
     );
+
     this.total_Products = [];
   }
 
-  selectOption(option: string): void {
+  selectOption(option: string) {
     this.choice = option;
     this.step = 2;
   }
 
-  // ✅ Finalize payment and send order to backend
-  pay(method: string): void {
-    const orders = this.total_Products.map((product) => ({
-      product_id: product._id,
-      name_product: product.name_product,
-      name_category: product.name_category,
-      img: product.img,
-      price: product.price,
-      qty: product.qtyAdded,
-      discount: product.discount,
-      amount: product.price * product.qtyAdded * (1 - product.discount / 100),
-      delivery_method: this.choice, // ✅ Include delivery method here
-      customer_name: localStorage.getItem('user') || '',
-      customer_phone: localStorage.getItem('phone_number') || '',
-      customer_address: localStorage.getItem('address') || '',
-    }));
+  submitOrder() {
+    const order = {
+      user_id: localStorage.getItem('userId'),
+      customer_name: localStorage.getItem('user'),
+      customer_phone: localStorage.getItem('phone_number'),
+      customer_address: localStorage.getItem('address'),
 
-    this.http.post('http://localhost:3000/api/order', orders).subscribe({
-      next: (res) => console.log('Order saved', res),
-      error: (err) => console.error(err),
-    });
+      delivery_method: this.choice,
+      payment_method: this.payment_method || 'Cash',
 
-    if (method === 'QR Pay') {
-      this.showQRCode = true;
-    } else if (method === 'Cash') {
-      this.showCash = true;
-    }
+      products: this.total_Products.map((p) => ({
+        product_id: p._id,
+        name_product: p.name_product,
+        img: p.img || 'no-img.jpg',
+        price: p.price,
+        qty: p.qtyAdded || 1,
 
+        // FIX HERE
+        discount: Math.min(Math.max(p.discount || 0, 0), 100),
+
+        amount:
+          p.price * (p.qtyAdded || 1) * (1 - Math.min(Math.max(p.discount || 0, 0), 100) / 100),
+      })),
+    };
+
+    console.log('SENDING ORDER TO BACKEND:', order);
+
+    return this.http.post('http://localhost:3000/api/order', order);
+  }
+
+  pay(method: string) {
+    this.payment_method = method;
+    this.showQRCode = method === 'QR Pay';
+    this.showCash = method === 'Cash';
     this.step = 0;
   }
 
-  back(): void {
+  back() {
     this.step = 1;
     this.choice = '';
   }
 
-  trackById(index: number, item: any): any {
+  trackById(index: number, item: any) {
     return item.id;
   }
 
-  // 🖨 Print QR Receipt
   printQR() {
-    if (!this.total_Products.length) {
-      alert('No products to print!');
-      return;
-    }
-    this.printReceipt('📱 QR Payment Receipt', '#2563eb');
+    if (!this.total_Products.length) return alert('No products to print!');
+
+    this.submitOrder().subscribe({
+      next: () => this.printReceipt('📱 QR Payment Receipt', '#2563eb'),
+      error: (err) => console.error(err),
+    });
   }
 
-  // 🖨 Print Cash Receipt
   printCash() {
-    if (!this.total_Products.length) {
-      alert('No products to print!');
-      return;
-    }
-    this.printReceipt('💵 Cash Payment Receipt', '#16a34a');
+    if (!this.total_Products.length) return alert('No products to print!');
+
+    this.submitOrder().subscribe({
+      next: () => this.printReceipt('💵 Cash Payment Receipt', '#16a34a'),
+      error: (err) => console.error(err),
+    });
   }
 
-  // 🧾 Shared print function
   private printReceipt(title: string, color: string) {
     const rows = this.total_Products
       .map(
         (p, i) => `
-      <tr>
-        <td>${p.id || i++}</td>
-        <td>${p.name || p.name_product}</td>
-        <td>${p.qtyAdded}</td>
-        <td>${((p.price - (p.price * p.discount) / 100) * p.qtyAdded).toFixed(2)} USD</td>
-      </tr>`
+        <tr>
+          <td>${i + 1}</td>
+          <td>${p.name_product}</td>
+          <td>${p.qtyAdded}</td>
+          <td>${((p.price - (p.price * p.discount) / 100) * p.qtyAdded).toFixed(2)} USD</td>
+        </tr>`
       )
       .join('');
 
-    const printWindow = window.open('', '', 'width=800,height=600');
-    if (!printWindow) return;
+    const w = window.open('', '', 'width=800,height=600');
+    if (!w) return;
 
-    printWindow.document.write(`
+    w.document.write(`
       <html>
         <head>
           <title>${title}</title>
@@ -235,11 +279,10 @@ export class Payment implements OnInit {
       </html>
     `);
 
-    printWindow.document.close();
-    printWindow.onload = () => {
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
+    w.document.close();
+    w.onload = () => {
+      w.print();
+      w.close();
       this.clearCart();
       location.reload();
     };

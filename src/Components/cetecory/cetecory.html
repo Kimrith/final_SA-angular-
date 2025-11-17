@@ -16,6 +16,18 @@
 <div class="px-4 max-w-screen-xl mx-auto py-8 fade-up">
   <h2 class="text-3xl font-bold text-center mb-10 fade-down">Let see more Product!</h2>
 
+  <div *ngIf="error" class="text-center text-red-500 mb-6 py-4 bg-red-50 rounded-lg">
+    {{ error }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-10">
+    <div
+      class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"
+    ></div>
+    <p class="mt-2 text-gray-600">Loading trending products...</p>
+  </div>
+
   <div
     class="sm:grid sm:grid-cols-2 md:grid-cols-4 gap-8 flex overflow-x-auto space-x-4 sm:space-x-0 sm:overflow-x-visible px-2"
   >
