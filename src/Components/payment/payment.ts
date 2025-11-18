@@ -86,11 +86,27 @@ export class Payment implements OnInit {
   }
 
   loadCart() {
-    this.totalQty = JSON.parse(localStorage.getItem('totalqty') || '0');
-    this.totalPrice = JSON.parse(localStorage.getItem('totalprice') || '0');
-    this.toalPrice_product = JSON.parse(localStorage.getItem('toalPrice_product') || '0');
-    this.totalPriceWithDiscount = JSON.parse(localStorage.getItem('totalpriceWithDiscount') || '0');
     this.total_Products = JSON.parse(localStorage.getItem('cart') || '[]');
+
+    // FIX: Make sure every product has qtyAdded
+    this.total_Products = this.total_Products.map((p) => ({
+      ...p,
+      qtyAdded: p.qtyAdded && p.qtyAdded > 0 ? p.qtyAdded : 1,
+    }));
+
+    // Calculate quantity
+    this.totalQty = this.total_Products.reduce((sum, item) => sum + item.qtyAdded, 0);
+
+    // Calculate total price with discount
+    this.totalPriceWithDiscount = this.total_Products.reduce((sum, p) => {
+      const priceAfterDiscount = p.price * (1 - (p.discount || 0) / 100);
+      return sum + priceAfterDiscount * p.qtyAdded;
+    }, 0);
+
+    // Save back to localStorage
+    localStorage.setItem('cart', JSON.stringify(this.total_Products));
+    localStorage.setItem('totalqty', JSON.stringify(this.totalQty));
+    localStorage.setItem('totalpriceWithDiscount', JSON.stringify(this.totalPriceWithDiscount));
   }
 
   getTotalQty() {
@@ -129,11 +145,19 @@ export class Payment implements OnInit {
   }
 
   payNow(): void {
-    if (this.getGrandTotal() === 0) {
-      alert('🛑 Your cart is empty.');
-      this.router.navigate(['/home']);
+    // Check if any product has stock = 0
+    const outOfStock = this.total_Products.find((p) => p.stock <= 0);
+
+    if (outOfStock) {
+      alert(`🛑 ${outOfStock.name_product} is out of stock!`);
       return;
     }
+
+    // if (this.getGrandTotal() === 0) {
+    //   alert('🛑 Your cart is empty.');
+    //   this.router.navigate(['/home']);
+    //   return;
+    // }
 
     if (!this.loggedIn) {
       alert('⚠️ Please login first.');
@@ -219,7 +243,13 @@ export class Payment implements OnInit {
 
     this.submitOrder().subscribe({
       next: () => this.printReceipt('📱 QR Payment Receipt', '#2563eb'),
-      error: (err) => console.error(err),
+      error: (err) => {
+        if (err.status === 400 && err.error?.message) {
+          alert(err.error.message);
+        } else {
+          alert('Something went wrong!');
+        }
+      },
     });
   }
 
@@ -228,7 +258,9 @@ export class Payment implements OnInit {
 
     this.submitOrder().subscribe({
       next: () => this.printReceipt('💵 Cash Payment Receipt', '#16a34a'),
-      error: (err) => console.error(err),
+      error: (err) => {
+        alert(err.error?.message || 'Order failed!');
+      },
     });
   }
 
