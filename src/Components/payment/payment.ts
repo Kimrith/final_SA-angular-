@@ -207,7 +207,7 @@ export class Payment implements OnInit {
         name_product: p.name_product,
         img: p.img || 'no-img.jpg',
         price: p.price,
-        qty: p.qtyAdded || 1,
+        qty: p.qtyAdded,
 
         // FIX HERE
         discount: Math.min(Math.max(p.discount || 0, 0), 100),

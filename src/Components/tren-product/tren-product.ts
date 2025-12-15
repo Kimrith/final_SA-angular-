@@ -17,14 +17,13 @@ export class TrenProduct {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.http.get<any[]>('http://localhost:3000/api/order/getTrendingProducts').subscribe({
-      next: (data) => {
-        this.trendingProducts = data;
+    this.http.get<any[]>('http://localhost:3000/api/product/trend').subscribe({
+      next: (res) => {
+        this.trendingProducts = Array.isArray(res) ? res : [];
         this.loading = false;
       },
       error: (err) => {
-        console.error('Failed to fetch trending products', err);
-        this.error = 'Failed to fetch trending products';
+        this.error = 'Failed to load trending products';
         this.loading = false;
       },
     });

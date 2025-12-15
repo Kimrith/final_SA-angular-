@@ -19,6 +19,8 @@ export class Navbar implements OnInit {
   user_name: string = '';
   searchValue: string = '';
 
+  userId = localStorage.getItem('userId') || '';
+
   constructor(private router: Router, private http: HttpClient) {}
 
   navItems = [
@@ -44,6 +46,12 @@ export class Navbar implements OnInit {
     if (savedImage) {
       this.imgUpload = savedImage;
     }
+
+    if (this.userId) {
+      this.http.get(`http://localhost:3000/api/login/${this.userId}`).subscribe((res: any) => {
+        this.imgUpload = res.profile_img; // backend image
+      });
+    }
   }
 
   checkLoginStatus() {
@@ -62,14 +70,14 @@ export class Navbar implements OnInit {
     if (this.loggedIn) {
       this.loggedIn = false;
       localStorage.setItem('isLoggedIn', 'false');
-      localStorage.removeItem('user');
+      localStorage.removeItem('userId');
       window.dispatchEvent(new Event('storage'));
       localStorage.removeItem('phone_number');
       this.router.navigate(['/login']);
       localStorage.removeItem('imgUpload');
       localStorage.removeItem('address');
       localStorage.removeItem('Com_password');
-      localStorage.removeItem('emailInput');
+      localStorage.removeItem('email');
       localStorage.removeItem('password');
     } else {
       this.router.navigate(['/login']);

@@ -2,6 +2,7 @@ import { NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-setting',
@@ -20,42 +21,58 @@ export class Setting implements OnInit {
   address: string = '';
   showTopup: boolean = false;
 
-  constructor(private router: Router) {}
+  userId = localStorage.getItem('userId') || '';
+  // EXACT same key as login page
+
+  constructor(private router: Router, private http: HttpClient) {}
   isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
   ngOnInit(): void {
-    // if (!this.isLoggedIn) {
+    // if (!this.userId) {
     //   this.router.navigate(['/login']);
+    //   return;
     // }
 
-    this.imgUpload = localStorage.getItem('imgUpload');
-    this.username = localStorage.getItem('user') || '';
-    this.phone_num = localStorage.getItem('phone_number') || '';
-    this.email = localStorage.getItem('emailInput') || '';
-    this.password = localStorage.getItem('password') || '';
-    this.comfirm_password = localStorage.getItem('Com_password') || '';
-    this.address = localStorage.getItem('address') || '';
+    // 🔥 Load user data from API instead of localStorage
+    this.http.get(`http://localhost:3000/api/login/${this.userId}`).subscribe((user: any) => {
+      this.imgUpload = user.profile_img || '';
+      this.username = user.name_user || '';
+      this.phone_num = user.phone_number || '';
+      this.email = user.email || '';
+      this.address = user.address || '';
+      this.password = user.password;
+      this.comfirm_password = user.password;
+    });
   }
 
   saveChange() {
-    localStorage.setItem('imgUpload', this.imgUpload);
-    localStorage.setItem('user', this.username);
-    localStorage.setItem('phone_number', this.phone_num);
-    localStorage.setItem('emailInput', this.email);
-    localStorage.setItem('password', this.password);
-    localStorage.setItem('Com_password', this.comfirm_password);
-    localStorage.setItem('address', this.address);
+    const updatedData = {
+      profile_img: this.imgUpload,
+      name_user: this.username,
+      phone_number: this.phone_num,
+      email: this.email,
+      password: this.password,
+      address: this.address,
+    };
 
-    alert('✅ Changes saved successfully!');
-    location.reload();
+    if (this.password === this.comfirm_password) {
+      // 🔥 Save changes to API
+      this.http.put(`http://localhost:3000/api/login/${this.userId}`, updatedData).subscribe(() => {
+        alert('✅ Changes saved successfully!');
+      });
+    } else {
+      alert('comfirm the passord!');
+    }
   }
 
   remove() {
     if (confirm('Are you sure you want to remove your account data?')) {
-      localStorage.clear();
-      localStorage.setItem('isLoggedIn', 'false');
-      alert('Account removed!');
-      this.router.navigate(['/login']);
+      this.http.delete(`http://localhost:3000/api/login/${this.userId}`).subscribe(() => {
+        localStorage.clear();
+        localStorage.setItem('isLoggedIn', 'false');
+        alert('Account removed!');
+        this.router.navigate(['/login']);
+      });
     }
   }
 
@@ -73,14 +90,17 @@ export class Setting implements OnInit {
   }
 
   upload() {
-    localStorage.setItem('imgUpload', this.imgUpload);
-    this.showTopup = false;
-    location.reload();
-    alert('Profile image updated!');
+    const updatedImg = { profile_img: this.imgUpload };
+
+    // 🔥 Update only image
+    this.http.put(`http://localhost:3000/api/login/${this.userId}`, updatedImg).subscribe(() => {
+      this.showTopup = false;
+      alert('Profile image updated!');
+      location.reload();
+    });
   }
 
   back() {
-    this.imgUpload = null;
     this.showTopup = false;
   }
 
